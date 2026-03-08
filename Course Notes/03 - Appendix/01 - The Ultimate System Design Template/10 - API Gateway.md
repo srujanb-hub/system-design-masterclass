@@ -29,6 +29,7 @@
 * **🔒 Security:** Enforces security policies like authentication and authorization.
 * **🕵️ Abstraction:** Hides the internal structure of the backend services from clients.
 * **⚡ Reduced Latency:** Optimizes requests and responses to improve performance.
+* **Rate Limiter:**  Limit the input user requests according to backend server capacity.
 
 ---
 

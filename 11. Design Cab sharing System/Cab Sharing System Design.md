@@ -629,9 +629,15 @@ How Mark was able to view the map which allowed him to choose pick-up and drop-o
 
 1. Mark can tap the __Cab Sharing App__ icon on his mobile device(client) to open Cab Sharing Application.
 
-2. The __Client__ can send view request to the __API gateway__ via WebSocket connection.
-    - An API gateway acts as a single entry point for all incoming requests.
-    *Note:* For more details, we can refer to our [API gateway template](../Course%20Notes/03%20-%20Appendix/01%20-%20The%20Ultimate%20System%20Design%20Template/10%20-%20API%20Gateway.md)
+2. The __Client__ can raise a view request.
+    - Firstly, the __Client__ can request the __CDN__ for relevant data, if same location data available at CDN.
+        - The __CDN__ can get the relevant data from a region-based edge server.
+        - If edge server doesn't have the requested data, then it can get the data from origin server.
+        *Note:* We can co-relate the CDN concept with a simple example [here](../1.%20System%20Design%20Basics/Database%20and%20Storage%20Basics.md)
+
+    - Secondly, the __Client__ can send view request to the __API gateway__ via WebSocket connection, if CDN doesn't have relevant information.
+        - An API gateway acts as a single entry point for all incoming requests.
+        *Note:* For more details, we can refer to our [API gateway template](../Course%20Notes/03%20-%20Appendix/01%20-%20The%20Ultimate%20System%20Design%20Template/10%20-%20API%20Gateway.md)
 
 ![API Gateway Service Flow](./Resources/HLDViewMap2.png)
 
@@ -692,7 +698,7 @@ To provide map data with low latency, we can make use CDN effectively. The below
 
 ![View Map CDN Cache](./Resources/HLDCDNCache.png)
 
-1. Mark thought of opening his cab sharing application and __Client__ can request __CDN__ for Mark's __Map information__. 
+1. Mark thought of opening his cab sharing application and __Client__ can request __CDN__ for Mark's __Map information__.
 2. The __CDN__ worried because it doesn't have Mark's Map information, so it requested __Cab Sharing__ servers to provide relevant information.
 3. The __Cab Sharing__ servers can get the __map data__ from __key-value__ storage 
 4. The __Cab Sharing__ servers can provide the response back to the __CDN__.
@@ -711,7 +717,10 @@ How Mark was able to view ETA to the drop-off point? Let's find out.
 
 1. The __Client__ can get static Map data from __CDN__ for Mark and Mark can click __ok__ button after entering pick-up and drop-off points.
 
-2. The __Client__ can send __view ETA__ request to the __API gateway__.
+2. The __Client__ can send __view ETA__ request.
+    - Firstly, it can request the __CDN__ for the relevant information.
+        - The __CDN__ can check with the region-based edge server.
+    - Secondly, it can send __view ETA__ request to the __API gateway__, if there is no response from the CDN.
 
 >__*Note:*__ When Mark clicks __ok button__, other options such as cab type e.t.c can also be considered, but we are not covering them in this design.
 

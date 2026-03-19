@@ -12,7 +12,7 @@ The application layer can be hardened with standard __resilience patterns__ like
 
 Only after establishing this deeply fault-tolerant foundation should further optimizations for performance be introduced.
 
-# Plan of action
+# Expected changes in the design
 
 1. Add multi-region CDN flow before user requests backend server wherever it is required.
 2. For dynamic API traffic, we can use GSLB or DNS-based Traffic Steering to direct users to the healthiest region, not just the closest static edge node.

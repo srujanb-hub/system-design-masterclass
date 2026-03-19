@@ -12,6 +12,15 @@ The application layer can be hardened with standard __resilience patterns__ like
 
 Only after establishing this deeply fault-tolerant foundation should further optimizations for performance be introduced.
 
+# Plan of action
+
+1. Add multi-region CDN flow before user requests backend server wherever it is required.
+2. For dynamic API traffic, we can use GSLB or DNS-based Traffic Steering to direct users to the healthiest region, not just the closest static edge node.
+3. We can add Active-Active load balancers across multiple AZs.
+4. Update database flow with replication detail along with relevant algorithms.
+5. We can update application layer service between load balancer and other core services of backend system with Circuit Breakers pattern.
+
 # Abbreviations
 
-__AZ__	-	Available Zones
+__AZ__      -  Available Zones
+__GSLB__    -  Global Server Load Balancing

@@ -14,11 +14,25 @@ Only after establishing this deeply fault-tolerant foundation should further opt
 
 # Expected changes in the design
 
-1. Add multi-region CDN flow before user requests backend server wherever it is required.
-2. For dynamic API traffic, we can use GSLB or DNS-based Traffic Steering to direct users to the healthiest region, not just the closest static edge node.
-3. We can add Active-Active load balancers across multiple AZs.
-4. Update database flow with replication detail along with relevant algorithms.
-5. We can update application layer service between load balancer and other core services of backend system with Circuit Breakers pattern.
+1. Multi-CDN Strategy / Dynamic API traffic: Add multi-region CDN flow before user requests backend server wherever it is required.
+    - DNS-based Traffic Manager (Global Server Load Balancer)
+        - The Client requests standard web address instead of pointing directly to one CDN.
+        - Our DNS provider analyzes the client's location, CDN health, and latency.
+        - It then returns the IP address of the best available CDN.
+    - Key considerations
+        - Cache Synchronization: We can ensure that data is identical on CDN 1 and all other CDNs. If we purge content, then we need to purge it across all CDNs simultaneously.
+        - Complexity
+            - Configurations: CDN locations, health status etc.
+            - SSL certificates: Secure communication
+            - Logging for multiple providers: Event tracing that include CDN communication, errors, acknowledgements etc.
+        - Cost: Traffic Manager/DNS service plus the egress costs of multiple CDNs.
+        - Debugging: Troubleshooting becomes harder unless distributed logging mechanism.
+2. We can add Active-Active load balancers across multiple AZs.
+    - All nodes are available to serve the client(s) request(s).
+3. Update database flow with replication detail along with relevant algorithms.
+4. We can update application layer service between load balancer and other core services of backend system with Circuit Breakers pattern.
+    - Circuit Breakers pattern
+        - We can detect failures and encapsulates the logic of preventing a failure from constantly recurring during maintenance, temporary external system failure, or unexpected system difficulties.
 
 # Abbreviations
 

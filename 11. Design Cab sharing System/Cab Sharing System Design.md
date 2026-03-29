@@ -629,19 +629,13 @@ How Mark was able to view the map which allowed him to choose pick-up and drop-o
 
 1. Mark can tap the __Cab Sharing App__ icon on his mobile device(client) to open Cab Sharing Application.
 
-2. The __Client__ can raise a view request.
-    - Firstly, the __Client__ can request the __CDN__ for relevant data, if same location data available at CDN.
-        - The __CDN__ can get the relevant data from a region-based edge server.
-        - If edge server doesn't have the requested data, then it can get the data from origin server.
-        *Note:* We can co-relate the CDN concept with a simple example [here](../1.%20System%20Design%20Basics/Database%20and%20Storage%20Basics.md)
-
-    - Secondly, the __Client__ can send view request to the __API gateway__ via WebSocket connection, if CDN doesn't have relevant information.
-        - An API gateway acts as a single entry point for all incoming requests.
-        *Note:* For more details, we can refer to our [API gateway template](../Course%20Notes/03%20-%20Appendix/01%20-%20The%20Ultimate%20System%20Design%20Template/10%20-%20API%20Gateway.md)
+2. The __Client__ can send view request to the __API gateway__ via WebSocket connection.
+    - An API gateway acts as a single entry point for all incoming requests.
+    *Note:* For more details, we can refer to our [API gateway template](../Course%20Notes/03%20-%20Appendix/01%20-%20The%20Ultimate%20System%20Design%20Template/10%20-%20API%20Gateway.md)
 
 ![API Gateway Service Flow](./Resources/HLDViewMap2.png)
 
-3. The __API gateway__ can relay the request to the __load balancer__.
+3. The __API gateway__ can relay the request to the active __load balancer__ of any Zone based on it's availability.
     - A load balancer acts like a traffic manager, directing incoming user requests to different servers.
     *Note:* For more details, we can refer to our [ultimate system design template](../Course%20Notes/03%20-%20Appendix/01%20-%20The%20Ultimate%20System%20Design%20Template/04%20-%20Load%20Balancer.md)
 
@@ -650,7 +644,7 @@ How Mark was able to view the map which allowed him to choose pick-up and drop-o
 
 ![Flow within Service Cluster](./Resources/HLDViewMap3.png)
 
-5. The __Data Fetch__ service can relay the request to a Load balancer within the service cluster. The Load balancer can direct the request to a available __Map__ service.
+5. The __Data Fetch__ service can relay the request to any active Load balancer of any available zone within the service cluster. The Load balancer can direct the request to a available __Map__ service.
     - The __Map__ service is responsible to manage map data.
     - There can be __multiple Map services__ to address multiple requests simultaneously.
 
@@ -681,29 +675,12 @@ How Mark was able to view the map which allowed him to choose pick-up and drop-o
 
 13. The __API gateway__ can send the response back to the __Client__. Now, Mark can view the booking page with a __Map view__.
 
-14. The __Client__ can save map information to the __CDN__.
-    - The __Content Delivery Network(CDN)__ store copies of our website’s data that doesn’t change too often.
-    *Note:* For more details on CDN, we can refer to the CDN section of [Database Storages](../1.%20System%20Design%20Basics/Database%20and%20Storage%20Basics.md).
-
-15. We can use in-memory cache to __avoid__ additional __network data usage__ on duplicate download of map data by drivers.
+14. We can use in-memory cache to __avoid__ additional __network data usage__ on duplicate download of map data by drivers.
     - __In-memory cache__ can help us to update data only if the server map data changes.
 
 #### Final HLD for View Map:
 
 ![View Map Overall Flow](./Resources/HLDViewMapOverall.png)
-
-#### Map Cache Flow
-
-To provide map data with low latency, we can make use CDN effectively. The below image gives us an idea how CDN decreases latency in loading Mark's/John's Map details.
-
-![View Map CDN Cache](./Resources/HLDCDNCache.png)
-
-1. Mark thought of opening his cab sharing application and __Client__ can request __CDN__ for Mark's __Map information__.
-2. The __CDN__ worried because it doesn't have Mark's Map information, so it requested __Cab Sharing__ servers to provide relevant information.
-3. The __Cab Sharing__ servers can get the __map data__ from __key-value__ storage 
-4. The __Cab Sharing__ servers can provide the response back to the __CDN__.
-
->__*Note:*__ The Client can __validate__ the CDN __cache correctness__ based on various __factors__ such as Mark's or John's current location e.t.c.,
 
 #### Technology Chosen:
 __Google’s S2 library__: Unlike many geometry libraries, google's S2 is primarily designed to work with spherical geometry
@@ -1147,19 +1124,18 @@ We've seen how the Map service provided services to Mark and John by gathering d
 
 #### The process of getting map information
 
-__Introduction:__
+__Definition:__
 
 - [OpenStreetMap](https://en.wikipedia.org/wiki/OpenStreetMap): OpenStreetMap (OSM) is a free, open map database updated and maintained by a community of volunteers via open collaboration. For more information, we can click on the hyperlink.
-
 - [S2 Library](http://s2geometry.io/): Unlike many geometry libraries, google's S2 is primarily designed to work with spherical geometry, i.e: shapes drawn on a sphere rather than on a planar 2D map.
     - Some of the S2 features:
         - S2 divides the map into grids called cells and gives each cell a unique ID.
         - Flexible support for spatial indexing, including the ability to estimate inconsistent regions as a collection of discrete S2 cells. This feature makes it easy to build distributed spacial indexes.
         - Fast in-memory spacial indexing of collections of points, polylines, and polygons.
-
 - [Amazon DynamoDB](https://en.wikipedia.org/wiki/Amazon_DynamoDB) is a managed NoSQL database service provided by Amazon Web Services (AWS). It supports key-value and document data structures. It is primarily used for scalability and performance.
 
 __Usage:__
+
 - We can use OSM for internal map data. It gives a free and editable map of the world.
 - And can use Google’s S2 library on top of OSM to efficiently index and query map data.
 - OSM can store road metadata and road segment sequences in each cell. It helps to understand turn restrictions on the road.
@@ -1172,12 +1148,11 @@ This is how Mark and John were able to see their map information.
 
 We've seen how the ETA service provided services to Mark and John by following several steps. Now, let's look into into those steps.
 
-__Conceptual Introduction:__
+__Definition:__
 
 - [Graph](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)): There are two types of graphs: __directed__ and __undirected__.
     - __Directed Graph__: A directed graph G is a pair (V, E), where V is a finite set and E is a binary relation on V. The set V is called vertex set of G, and its elements are called vertices. The set E is called the edge set of G, and its elements are called edges.
     - __Undirected Graph__: In an undirected graph G = (V, E), the edge set E consists of unordered pairs of vertices, rather than ordered pairs.
-
 - __Weighted Graph__: Graphs for which each edge has an associated weight, typically given by a weight function w: E -> R. For example, let G = (V, E) be a weighted graph with weight function w. We simply store the weight w(u, v) of the edge (u, v) ∈ E with vertex v in u's adjacency list.
     - ∈ denotes set membership, and is read "is in", "belongs to", or "is a member of".
 - [Routing Algorithm(Dijkstra)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm): Dijkstra's algorithm is an algorithm for finding the shortest paths between nodes in a weighted graph, which may represent, for example, a road network.
@@ -1196,17 +1171,21 @@ __Conceptual Introduction:__
     - Put another way, the time complexity to find the best path in the San Francisco Bay Area gets reduced from 500 Thousand to 700.
 
 2. Traffic Information:
-
-- The traffic on the road segments must be considered to find the fastest path between 2 points.
-- While traffic is a function of the __time of the day__, __weather__, and __number of vehicles__ on the road.
-- We can __use__ traffic information __to populate__ the __edge weights__ of the graph. Because it can make the ETA more __accurate__.
-- Besides we can combine aggregated __historical speed information__ that was stored in the hash table with real-time speed information. Because extra traversal data makes traffic information __more accurate__.
+    - The traffic on the road segments must be considered to find the fastest path between 2 points.
+    - While traffic is a function of the __time of the day__, __weather__, and __number of vehicles__ on the road.
+    - We can __use__ traffic information __to populate__ the __edge weights__ of the graph. Because it can make the ETA more __accurate__.
+    - Besides we can combine aggregated __historical speed information__ that was stored in the hash table with real-time speed information. Because extra traversal data makes traffic information __more accurate__.
 
 3. Map Matching:
-
-- __GPS signals__ can get noisy especially when the vehicle enters a enclosed areas like tunnel(s).
-- Also the __multi-path effect__ could __worsen__ the GPS signal. The multi-path effect occurs when buildings reflect the GPS signal. A __poor__ GPS signal __decreases__ the ETA accuracy.
-- So they do __map matching__ to find the best ETA. Map matching works by __mapping raw GPS signals__ to __actual road segments__.
+    - __GPS signals__ can get noisy especially when the vehicle enters a enclosed areas like tunnel(s).
+    - Also the __multi-path effect__ could __worsen__ the GPS signal. The multi-path effect occurs when buildings reflect the GPS signal. A __poor__ GPS signal __decreases__ the ETA accuracy.
+    - So they do __map matching__ to find the best ETA. Map matching works by __mapping raw GPS signals__ to __actual road segments__.
+    - We can use the [Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) for map matching. It takes GPS signals and matches them to road segments.
+        - Imagine the Kalman filter as a __person who makes a correct guess__ about something's location. The __new and old information__ is taken into consideration for __guessing__.
+    - Besides we can use the [Viterbi algorithm](https://en.wikipedia.org/wiki/Viterbi_algorithm) to __find the most probable road segments__. It's a dynamic programming approach.
+        - Imagine the Viterbi algorithm as a person who __figures out the correct story__ even if __some words were spelled wrong__. We can do that by __looking at the nearby words__ and __fixing the mistakes__ so that the story makes more sense.
+    - Mark may __avoid__ his future trips if the __actual trip time is higher__ than ETA. Also, __more than 30 million__ trips can be completed daily as per our consideration.
+    - So at our scale, a bad ETA could cost cab sharing company billions of USD in loss. The __current approach__ can allow us to __scale__ to half a million requests per second.
 
 |   GPS Signals     |   Road Segments   |
 |-------------------|-------------------|
@@ -1216,30 +1195,23 @@ __Conceptual Introduction:__
 |   Speed           |                   |
 |                   |   Road Name       |
 |                   |   Segment ID      |
-
-- We can use the [Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) for map matching. It takes GPS signals and matches them to road segments.
-    - Imagine the Kalman filter as a __person who makes a correct guess__ about something's location. The __new and old information__ is taken into consideration for __guessing__.
-- Besides we can use the [Viterbi algorithm](https://en.wikipedia.org/wiki/Viterbi_algorithm) to __find the most probable road segments__. It's a dynamic programming approach.
-    - Imagine the Viterbi algorithm as a person who __figures out the correct story__ even if __some words were spelled wrong__. We can do that by __looking at the nearby words__ and __fixing the mistakes__ so that the story makes more sense.
-- Mark may __avoid__ his future trips if the __actual trip time is higher__ than ETA. Also, __more than 30 million__ trips can be completed daily as per our consideration.
-- So at our scale, a bad ETA could cost cab sharing company billions of USD in loss. The __current approach__ can allow us to __scale__ to half a million requests per second.
+|                   |                   |
 
 ### Find A Driver
 
 We saw how the Driver Finder service provided services to Mark, to find John by following a process. Now, let's zoom into that sequence.
 
-__Conceptual Introduction:__
+#### Definition
+
 - [Redis](https://redis.io/docs/latest/): Redis is preferred real-time data-driven applications like Cab sharing system. It is fastest, and most feature-rich cache, data structure server, and document and vector query engine.
 
-__The process of finding a driver:__
+#### The process of finding a driver:
 
 - We can __store driver locations__ in a __Redis cluster__ for scalability and low latency. A Redis cluster contains many __Redis instances__ as shown in the HLD image. This means __driver locations__ are __spread__ across many Redis instances. Thus preventing global __write lock__ and __contention__ issues when many rides get __ordered__ at the same time.
-
 - But sharding Redis based on region causes a __hot shard problem__ because of more drivers in big cities.
     - So we can use __Google’s S2 library__ and __divide__ the __map into grids__.
         - And S2 is hierarchical. That means the __cell__ size __varies__ from __square centimeters__ to __square kilometers__.
         - We can choose __Geohash__ (level 5) by default to find nearby drivers. It represents a __square kilometer__, so only a __few cars will fit__ inside a single shard. And the hot shard problem wouldn't occur.
-
 - Redis cluster may contain drivers who __stopped__ driving for the rest of the day. But we __want__ only __active__ drivers. This means drivers who are still driving during the day.
     - A simple approach is to create __in-memory time buckets__ periodically. Then __store__ the __list of active drivers__ in it.
     - And __remove old buckets__ every 20-30 seconds(approx). So only __active drivers will stay__ in the latest bucket.
@@ -1247,7 +1219,26 @@ __The process of finding a driver:__
         - So we can use a Redis __sorted set__ in __each Geohash__ to __find nearby drivers__. And store the __last timestamp__ reported by the drivers in a __sorted__ order. While inactive driver data is expired using the [ZREMRANGEBYSCORE](https://redis.io/docs/latest/commands/zremrangebyscore//) command. That means only data of those drivers who haven’t reported in the last 30 seconds will expire. Simply put, we can __overwrite memory__ __instead of reallocating__ it. Imagine the sorted set as key-value pairs sorted by score.
     - Besides we can store the driver location in a hash data structure. It's also queried to ensure that a driver doesn’t show up in 2 different Geohashes while driving through.
 
+### Common Functionalities
+
+#### Definition
+
+- Circuit Breaker Pattern: It's a design pattern used to detect failures and encapsulates the logic of preventing a failure from constantly recurring during maintenance, temporary external system failure, or unexpected system difficulties.
+    - How it works?
+    We wrap a protected function call in a circuit breaker object, which monitors for failures. Once the failures reach a certain threshold, the circuit breaker trips, and all further calls to the circuit breaker return with an error, without the protected call being made at all. Usually, we'll also want some kind of monitor alert if the circuit breaker trips.
+    - Why do we need it?
+    It's common for software systems to make remote calls to software running in different processes, probably on different machines across a network. One of the big differences between in-memory calls and remote calls is that remote calls can fail, or hang without a response until timeout limit is reached. What's worse is if we have many callers on an unresponsive supplier, then we can run out of critical resources leading to cascading failures across multiple systems.
+    - States
+        - Closed: When everything is normal, the circuit breakers remain closed, and all the request passes through to the services as normal.
+        - Open: In this state, the circuit breaker returns an error immediately without even invoking the services.
+        - Half-open: In this state, the circuit breaker allows a limited number of requests from the service to pass through and invoke the operation.
+
+#### Usage:
+
+- The __Data Fetch Service__ of almost all considered functionalities in the design can incorporate with the circuit breaker pattern to detect and prevent failures.
+    - If the circuit breaker is in closed-state, then it can continue with the ongoing operation.
+    - If the circuit breaker is in open-state, then it can redirect the request to next available service through any active load balancer of any available zone.
+
 <hr style="border:2px solid gray">
 
->__*Note:*__
->1. The Map and other reference icons are considered just as an example. We can always change them as per our convenience.
+>__*Note:*__ The Map and other reference icons are considered just as an example. We can always change them as per our convenience.

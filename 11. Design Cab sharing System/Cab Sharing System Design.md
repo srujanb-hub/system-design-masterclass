@@ -692,18 +692,15 @@ How Mark was able to view ETA to the drop-off point? Let's find out.
 
 ![User Request](./Resources/HLDviewETA1.png)
 
-1. The __Client__ can get static Map data from __CDN__ for Mark and Mark can click __ok__ button after entering pick-up and drop-off points.
+1. Mark can open the application to enter pick-up and drop-off points, and can click __ok__ button.
 
-2. The __Client__ can send __view ETA__ request.
-    - Firstly, it can request the __CDN__ for the relevant information.
-        - The __CDN__ can check with the region-based edge server.
-    - Secondly, it can send __view ETA__ request to the __API gateway__, if there is no response from the CDN.
+2. The __Client__ can send __view ETA__ request to the __API gateway__.
 
 >__*Note:*__ When Mark clicks __ok button__, other options such as cab type e.t.c can also be considered, but we are not covering them in this design.
 
 ![API Load Balancer Flow](./Resources/HLDviewETA2.png)
 
-3. The __API gateway__ can relay the request to __load balancer__.
+3. The __API gateway__ can relay the request to __load balancer__ of any zone based on it's availability.
 
 4. The __Load balancer__ can direct the same request to __Data Fetch__ service.
 
@@ -775,14 +772,14 @@ How Mark was able to find a driver for his booking? Let's look into it.
 
 ![User Request](./Resources/HLDfindADriver1.png)
 
-1. The __Client__ can get static Map data from __CDN__ for Mark and Mark can click __Book__ button after knowing ETA to his drop-off point.
+1. Mark can click __Book__ button after knowing ETA to his drop-off point.
 
 2. The __Client__ can send __booking__ request to the __API gateway__.
     - __Find A Driver__ request is a part of booking request.
 
 ![API Load Balancer Request](./Resources/HLDfindADriver2.png)
 
-3. The __API gateway__ can relay the request to the __load balancer__.
+3. The __API gateway__ can relay the request to the __load balancer__ of any zone based on it's availability.
 
 4. The __Load balancer__ can direct the same request to the __Data Fetch__ service.
 
@@ -849,10 +846,7 @@ How Mark was able to find a driver for his booking? Let's look into it.
 
 17. The __API gateway__ can send the response back to the __Client__ with booking acceptance message.
 
-18. The __Client__ can retrieve John details from the __CDN__.
-    *Note:* The Client can get the driver details from API gateway, but for faster load time, it can make use of CDN.
-
-19. Now, Mark is __able to view__ driver details via Client.
+18. Now, Mark is __able to view__ driver details via Client.
 
 ### Final HLD for finding a driver:
 

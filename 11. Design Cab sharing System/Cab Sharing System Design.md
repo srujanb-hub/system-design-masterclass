@@ -864,75 +864,61 @@ How Mark and John were able to track their ride? Let's take a look.
 
 1. __User can start their ride__ through __Client__ device to initiate __tracking__.
 
-2. The Client can __get static data__ from __CDN__ to populate on Client device.
-
-3. The __Client__ can make use of web-socket connection to forward the request to the __API Gateway__.
+2. The __Client__ can make use of web-socket connection to forward the request to the __API Gateway__.
 
 ![API Gateway Flow](./Resources/HLDTrackTheRide2.png)
 
-4. The __API gateway__ can relay the request to the __load balancer__.
+3. The __API gateway__ can relay the request to the __load balancer__ of a zone based on it's availability.
 
-5. The __Load balancer__ can direct the same request to the __Data Fetch__ service.
+4. The __Load balancer__ can direct the same request to the __Data Fetch__ service.
 
 ![Data Fetch Request Flow](./Resources/HLDTrackTheRide3.png)
 
-6. The __Data Fetch__ service can send the Map data request to the available __Map__ service through a __Load Balancer__.
+5. The __Data Fetch__ service can send the Map data request to the available __Map__ service through a __Load Balancer__ of a zone based on it's availability.
 
-7. The __Data Fetch__ service can send the ETA request to the available __Ride Estimator__ service through a __Load Balancer__.
+6. The __Data Fetch__ service can send the ETA request to the available __Ride Estimator__ service through a __Load Balancer__ of a zone based on it's availability.
 
 ![Ride Tracking Flow](./Resources/HLDTrackTheRide4.png)
 
-8. The __Map__ service can take help from __Map Database__ handler to get the map details.
+7. The __Map__ service can take help from __Map Database__ handler to get the map details.
     - The __Map Database__ handler can use S2 index to get user's region and also to find relevant database partition.
     - The __Map Database__ handler can use this partition to download the map data from __key value storage__.
     - The __Map Database__ handler can relay the response to the __Map__ service.
 
-9. The __Map__ service can take help from the __GPS signal__ service to avoid the risk of missing road data.
+8. The __Map__ service can take help from the __GPS signal__ service to avoid the risk of missing road data.
 
-10. The __Map__ service can provide a copy of final map data output to the __Ride Estimator__ service for computing ETA.
+9. The __Map__ service can provide a copy of final map data output to the __Ride Estimator__ service for computing ETA.
     - The __Map__ service can send this information as per the request from the __Ride Estimator__ service.
 
-11. The __Estimator__ service can use __deep learning algorithms__ to predict traffic control elements, such as __stop signals__ and __traffic lights__.
+10. The __Estimator__ service can use __deep learning algorithms__ to predict traffic control elements, such as __stop signals__ and __traffic lights__.
     *Note:*
     1. The traffic control elements will be considered only once between pick-up and drop-off points.
     2. If Mark changes either pick-up point (at the start) or drop-off point (at the end), then we can repeat this step to get updated data.
 
-12. The __Estimator__ service can get location based average speeds from the hash table through __Estimator Database__ handler.
+11. The __Estimator__ service can get location based average speeds from the hash table through __Estimator Database__ handler.
 
-13. The __Estimator__ service can extract __GPS signal__ details for missing road information.
+12. The __Estimator__ service can extract __GPS signal__ details for missing road information.
     - This information is useful, if the estimated path encounters any run time changes like John takes different route to reach drop-off location or Mark updates the ride with stopping points in between.
 
-14. The __Estimator__ service will make use of __Map__ data to compute the ETA as per user's current location.
+13. The __Estimator__ service will make use of __Map__ data to compute the ETA as per user's current location.
     - The partition of Map graph is still useful to compute ETA by considering road intersections and road segments efficiently.
 
 ![Ride Tracking Response](./Resources/HLDTrackTheRide5.png)
 
-15. The __Map__ service can relay the response back to the __Data Fetch__ service.
-16. The __Ride Estimator__ service can provide the computed ETA to the __Data Fetch__ service.
-17. The __Data Fetch__ service can save user's current, drop-off location coordinates and respective ETA to the __user record__ database.
+14. The __Map__ service can relay the response back to the __Data Fetch__ service.
+15. The __Ride Estimator__ service can provide the computed ETA to the __Data Fetch__ service.
+16. The __Data Fetch__ service can save user's current, drop-off location coordinates and respective ETA to the __user record__ database.
     - This step can be an optional one, because it will be a storage overhead to maintain location coordinates through out the ride path.
     - We can consider the location coordinates at the start of the ride and at the end of the ride along with their ETA. Also, we can consider this storage if Mark changes his drop-off location.
 
 ![API Gateway Response](./Resources/HLDTrackTheRide6.png)
 
-18. The __API Gateway__ can give a response to the __Client__.
+17. The __API Gateway__ can give a response to the __Client__.
     - As we are tracking the ride, responses can be asynchronous i.e: cab sharing servers can keep-on sending responses to client as Mark's or John's current location progresses.
 
-19. The __Client__ can store the information to the __CDN__.
+18. As Mark progressed with his ride, our __backend-system__ responded back with __updated ETA__ along with his __latest location__ details to __Client__ through __API Gateway__.
 
-20. The static information from __CDN__ can be used to render the client's User Interface(UI) until, it receives the response from backend system.
-
-21. As Mark progressed with his ride, our __backend-system__ responded back with __updated ETA__ along with his __latest location__ details to __Client__ through __API Gateway__.
-
-22. The __Client__ can store the information to the __CDN__.
-
-23. The __Client retrieves__ static information that was saved in __CDN__.
-    - And this process of retrieving data from backend system for data population continuous until ride completes
-
-24. The __API Gateway__ can relay the ride completion response to the __client__.
-
-25. The __Client__ can save the ride completion status to the __CDN__.
-    - This can help Mark to view his ride status later on.
+19. The __API Gateway__ can relay the ride completion response to the __client__.
 
 #### Final HLD for Ride Tracking:
 

@@ -932,11 +932,13 @@ How John checked his Ride History? Let's see.
 
 1. John can click __Profile__ option from Client's home page to see an option for his ride history called __Activity__.
 
-2. As John's profile page is static, meaning options won't change often, the Client can take help from CDN to load profile page options.
-    - If John is accessing his profile page for the first time, then Client can request the Cab Sharing Servers for profile page data.
+2. As John's profile page is static, meaning options won't change often, the Client can take help from the CDN to load profile page options.
+    - The CDN can relay the request to it's edge server to get the response.
+    - If John is accessing his profile page for the first time, then the CDN's edge server can request the origin server for profile page data.
     - Also, we might be wondering, what will happen if there is a change in profile page options! This case can be handled in two ways-
         1. The Cab sharing system can notify client via Notification asynchronous communication service and can re-load the page with his approval.
         2. The Cab sharing system can collect all new features for client and release them as an when application upgrade happens (preferred for hand held devices like mobile applications).
+    - >Note: We can corelate CDN with a generic example ![here](../1. System Design Basics/Database and Storage Basics.md)
 
 3. After loading __profile__ page, John can click __Activity__ option to send ride history request.
 
@@ -944,7 +946,7 @@ How John checked his Ride History? Let's see.
 
 ![API-Load balancer](./Resources/HLDViewRideHistory2.png)
 
-5. The __API gateway__ can relay the request to the __load balancer__.
+5. The __API gateway__ can relay the request to the __load balancer__ of any available zone.
 
 6. The __Load balancer__ can direct the same request to the __Data Fetch__ service.
 
@@ -962,8 +964,7 @@ How John checked his Ride History? Let's see.
 
 10. __John can see__ his previous ride history along with payment information through __Client__.
 
-11. The __Client__ can save John's ride history to the __CDN__ until John completes his next ride.
-    - The reason for maintaining John's ride history until his next ride is, the Cab Sharing system can refresh the John's ride history based on his next ride status.
+11. The __Client__ can save John's ride history to the __CDN__ to accommodate future requests as applicable.
 
 __Final View Ride History HLD__:
 
@@ -1198,6 +1199,8 @@ We saw how the Driver Finder service provided services to Mark, to find John by 
     - __Yet it results__ in __constant allocation__ and __freeing up of memory__.
         - So we can use a Redis __sorted set__ in __each Geohash__ to __find nearby drivers__. And store the __last timestamp__ reported by the drivers in a __sorted__ order. While inactive driver data is expired using the [ZREMRANGEBYSCORE](https://redis.io/docs/latest/commands/zremrangebyscore//) command. That means only data of those drivers who haven’t reported in the last 30 seconds will expire. Simply put, we can __overwrite memory__ __instead of reallocating__ it. Imagine the sorted set as key-value pairs sorted by score.
     - Besides we can store the driver location in a hash data structure. It's also queried to ensure that a driver doesn’t show up in 2 different Geohashes while driving through.
+
+<!--[TODO] ### View Ride History  -->
 
 ### Common Functionalities
 

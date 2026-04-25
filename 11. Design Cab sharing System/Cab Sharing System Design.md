@@ -1,47 +1,34 @@
 # CAB SHARING SYSTEM DESIGN
 
 - [DECIDING REQUIREMENTS](#deciding-requirements)
-
     - [1. Functional Requirements](#functional-requirements)
-
     - [2. Non Functional Requirements](#non-functional-requirements)
 
 - [CAPACITY ESTIMATION](#capacity-estimation)
-
     - [3. DAU-MAU](#dau-mau-estimation)
-
     - [4. Throughput](#throughput-estimation)
-
     - [5. Storage](#storage-estimation)
-
     - [6. Memory](#memory-estimation)
-
     - [7. Network And Bandwidth Estimation](#network-and-bandwidth-estimation)
 
 - [API DESIGN](#api-design)
-
     - [8. API Design:Book A Cab](#api-design-book-a-cab)
-
     - [9. API Design:Track The Ride](#api-design-track-the-ride)
-
     - [10. API Design:View Ride History](#api-design-view-ride-history)
 
 - [HIGH LEVEL DESIGN](#high-level-design)
-
     - [11. High Level Design:Book A Cab](#high-level-design-book-a-cab)
-
     - [12. High Level Design:Track The Ride](#high-level-design-track-the-ride)
-
     - [13. High Level Design:View Ride History](#high-level-design-view-ride-history)
 
 - [DEEP DIVE INSIGHTS](#deep-dive-insights)
-
     - [14.DEEP DIVE INSIGHTS: Database Selection](#deep-dive-insights-database-selection)
-
     - [15.DEEP DIVE INSIGHTS: Database Modeling](#deep-dive-insights-database-modeling)
-
     - [16.DEEP DIVE INSIGHTS: Into Book A Cab Service](#deep-dive-insights-into-book-a-cab-service)
-
+        - [16.1.Into Book A Cab Service: View Map](#into-book-a-cab-service-view-map)
+        - [16.2.Into Book A Cab Service: View ETA](#into-book-a-cab-service-view-eta)
+        - [16.3.Into Book A Cab Service: Find A Driver](#into-book-a-cab-service-find-a-driver)
+        - [16.4.Into Book A Cab Service: View Ride History](#into-book-a-cab-service-view-ride-history)
 <hr style="border:2px solid gray">
 
 # DECIDING REQUIREMENTS
@@ -930,15 +917,11 @@ How John checked his Ride History? Let's see.
 
 ![Client Request](./Resources/HLDViewRideHistory1.png)
 
-1. John can click __Profile__ option from Client's home page to see an option for his ride history called __Activity__.
+1. John can click __Profile__ option from Client's home page to see an option for his ride history.
 
-2. As John's profile page is static, meaning options won't change often, the Client can take help from the CDN to load profile page options.
-    - The CDN can relay the request to it's edge server to get the response.
-    - If John is accessing his profile page for the first time, then the CDN's edge server can request the origin server for profile page data.
-    - Also, we might be wondering, what will happen if there is a change in profile page options! This case can be handled in two ways-
-        1. The Cab sharing system can notify client via Notification asynchronous communication service and can re-load the page with his approval.
-        2. The Cab sharing system can collect all new features for client and release them as an when application upgrade happens (preferred for hand held devices like mobile applications).
-    - >Note: We can corelate CDN with a generic example ![here](../1. System Design Basics/Database and Storage Basics.md)
+2. As some of the John's profile page data are static, meaning data won't change often, the Client can take help from the CDN to load profile page options.
+    - The CDN can relay the request to it's edge server within any available zone to get the response.
+    >Note: We can refer to deep dive for more details and can corelate CDN with a generic example [here](../1.%20System%20Design%20Basics/Database%20and%20Storage%20Basics.md)
 
 3. After loading __profile__ page, John can click __Activity__ option to send ride history request.
 
@@ -964,7 +947,7 @@ How John checked his Ride History? Let's see.
 
 10. __John can see__ his previous ride history along with payment information through __Client__.
 
-11. The __Client__ can save John's ride history to the __CDN__ to accommodate future requests as applicable.
+11. The __Client__ can save static data of John's ride history to the __CDN__'s edge server to accommodate future requests as applicable.
 
 __Final View Ride History HLD__:
 
@@ -1099,13 +1082,11 @@ The table below provides a high-level comparison of when to use __SQL__ vs __NoS
 
 ## DEEP DIVE INSIGHTS: Into Book A Cab Service
 
-### View Map
+### Into Book A Cab Service: View Map
 
 We've seen how the Map service provided services to Mark and John by gathering data from different sources. Now, let's dive deeper into those sources.
 
-#### The process of getting map information
-
-__Definition:__
+#### Definition(s):
 
 - [OpenStreetMap](https://en.wikipedia.org/wiki/OpenStreetMap): OpenStreetMap (OSM) is a free, open map database updated and maintained by a community of volunteers via open collaboration. For more information, we can click on the hyperlink.
 - [S2 Library](http://s2geometry.io/): Unlike many geometry libraries, google's S2 is primarily designed to work with spherical geometry, i.e: shapes drawn on a sphere rather than on a planar 2D map.
@@ -1115,7 +1096,7 @@ __Definition:__
         - Fast in-memory spacial indexing of collections of points, polylines, and polygons.
 - [Amazon DynamoDB](https://en.wikipedia.org/wiki/Amazon_DynamoDB) is a managed NoSQL database service provided by Amazon Web Services (AWS). It supports key-value and document data structures. It is primarily used for scalability and performance.
 
-__Usage:__
+#### The process of getting map information
 
 - We can use OSM for internal map data. It gives a free and editable map of the world.
 - And can use Google’s S2 library on top of OSM to efficiently index and query map data.
@@ -1125,11 +1106,11 @@ __Usage:__
 
 This is how Mark and John were able to see their map information.
 
-### View ETA
+### Into Book A Cab Service: View ETA
 
 We've seen how the ETA service provided services to Mark and John by following several steps. Now, let's look into into those steps.
 
-__Definition:__
+#### Definition(s):
 
 - [Graph](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)): There are two types of graphs: __directed__ and __undirected__.
     - __Directed Graph__: A directed graph G is a pair (V, E), where V is a finite set and E is a binary relation on V. The set V is called vertex set of G, and its elements are called vertices. The set E is called the edge set of G, and its elements are called edges.
@@ -1178,11 +1159,11 @@ __Definition:__
 |                   |   Segment ID      |
 |                   |                   |
 
-### Find A Driver
+### Into Book A Cab Service: Find A Driver
 
 We saw how the Driver Finder service provided services to Mark, to find John by following a process. Now, let's zoom into that sequence.
 
-#### Definition
+#### Definition(s)
 
 - [Redis](https://redis.io/docs/latest/): Redis is preferred real-time data-driven applications like Cab sharing system. It is fastest, and most feature-rich cache, data structure server, and document and vector query engine.
 
@@ -1200,7 +1181,20 @@ We saw how the Driver Finder service provided services to Mark, to find John by 
         - So we can use a Redis __sorted set__ in __each Geohash__ to __find nearby drivers__. And store the __last timestamp__ reported by the drivers in a __sorted__ order. While inactive driver data is expired using the [ZREMRANGEBYSCORE](https://redis.io/docs/latest/commands/zremrangebyscore//) command. That means only data of those drivers who haven’t reported in the last 30 seconds will expire. Simply put, we can __overwrite memory__ __instead of reallocating__ it. Imagine the sorted set as key-value pairs sorted by score.
     - Besides we can store the driver location in a hash data structure. It's also queried to ensure that a driver doesn’t show up in 2 different Geohashes while driving through.
 
-<!--[TODO] ### View Ride History  -->
+### Into Book A Cab Service: View Ride History
+
+We saw how the Ride History service provided services to John by following a process. Now, let's look into some technicalities.
+
+#### Definition(s)
+
+- [Content Delivery Network (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network): A content delivery network is a geographically distributed group of servers that work together to provide fast delivery of internet content. Generally, static files such as HTML/CSS/JS, photos, and videos are served from CDN.
+
+#### The process of viewing a ride history
+
+- In the context of John requesting CDN: If John is accessing his profile page for the first time, then the CDN's edge server within any available zone can request the origin server for profile page data.
+- What will happen if there is a change in profile page options? This case can be handled in two ways-
+    1. The Cab sharing system can notify client via Notification asynchronous communication service and can re-load the page with his approval.
+    2. The Cab sharing system can collect all new features for client and release them as an when application upgrade happens (preferred for hand held devices like mobile applications).
 
 ### Common Functionalities
 

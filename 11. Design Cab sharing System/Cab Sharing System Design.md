@@ -652,9 +652,6 @@ How Mark was able to view the map which allowed him to choose pick-up and drop-o
 
 12. The __Data Fetch__ can save user's map information to the __user record__ database.
     - The __user record__ database is responsible for maintaining user's information.
-        - Internally, we can implement __Cache Aside Strategy__ for read operations and __Write Aside Strategy__ for write operations as user's data storage has more importance in cab sharing system.
-        *Note:* For more details on caching, refer to our [Caching Basics](../1.%20System%20Design%20Basics/Caching%20Basics.md).
-            - As there is a chance of stale data, we can use [ZooKeeper service](https://en.wikipedia.org/wiki/Apache_ZooKeeper) to maintain synchronization between database and its replica(s).
 
 >__*Note:*__ Maintenance of multiple Map services can be dependent on no of user requests.
 
@@ -723,9 +720,6 @@ How Mark was able to view ETA to the drop-off point? Let's find out.
     - The final calculated ETA data can be relayed back to the __Data Fetch__ service.
 
 14. The computed __ETA__ along with user's details (such as user's current location, pick-up and drop-off points) can be registered in database through __Estimator Database__ handler for re-usability purposes.
-    *Note:*
-    1. Based on the business need we can limit or extend this storage.
-    2. For instance, if we want to limit, then we can save only ETA associated to pick-up and drop-off points to the Ride Estimator Database. Also, we can consider this storage if Mark changes his drop-off location.
 
 >__*Note:*__
 >- We can store average speeds in a hash table for fast look-up.
@@ -1119,6 +1113,26 @@ We've seen how the ETA service provided services to Mark and John by following s
     - ∈ denotes set membership, and is read "is in", "belongs to", or "is a member of".
 - [Routing Algorithm(Dijkstra)](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm): Dijkstra's algorithm is an algorithm for finding the shortest paths between nodes in a weighted graph, which may represent, for example, a road network.
 
+#### ETA Database
+
+1. Based on the business need, we can limit or extend this storage.
+2. For instance, if we want to limit, then we can save only ETA associated to pick-up and drop-off points to the Ride Estimator Database. Also, we can consider this storage if Mark changes his drop-off location.
+
+##### Caching Strategy
+
+- Internally, we can implement __Cache Aside Strategy__ for read operations and __Write Aside Strategy__ for write operations.
+*Note:* For more details on caching, refer to our [Caching Basics](../1.%20System%20Design%20Basics/Caching%20Basics.md).
+- As there is a chance of stale data, we can use [ZooKeeper service](https://en.wikipedia.org/wiki/Apache_ZooKeeper) to maintain synchronization between database and its replica(s).
+
+##### Replication Strategy
+
+- To prevent loss of data, we can replicate user ETA data.
+- User data replication can use master-slave strategy.
+    - In the master-slave strategy-
+        - We can use master database for write operations and slave database for only read operations.
+    - Masters can be more than one in order to avoid single point of failure for write operations.
+    - Slaves can be many to secure user ETA data as per business needs.
+
 #### The process of computing ETA
 
 1. Routing Algo:
@@ -1198,6 +1212,8 @@ We saw how the Ride History service provided services to John by following a pro
 
 ### Common Functionalities
 
+Now, let us see some common functionalities that helped Mark and John during their cab ride.
+
 #### Definition
 
 - Circuit Breaker Pattern: It's a design pattern used to detect failures and encapsulates the logic of preventing a failure from constantly recurring during maintenance, temporary external system failure, or unexpected system difficulties.
@@ -1210,11 +1226,34 @@ We saw how the Ride History service provided services to John by following a pro
         - Open: In this state, the circuit breaker returns an error immediately without even invoking the services.
         - Half-open: In this state, the circuit breaker allows a limited number of requests from the service to pass through and invoke the operation.
 
-#### Usage:
+#### Circuit Breaker Pattern:
 
 - The __Data Fetch Service__ of almost all considered functionalities in the design can incorporate with the circuit breaker pattern to detect and prevent failures.
     - If the circuit breaker is in closed-state, then it can continue with the ongoing operation.
     - If the circuit breaker is in open-state, then it can redirect the request to next available service through any active load balancer of any available zone.
+
+#### User Record Database
+
+The user record database was used in -
+    - View Map: To store user's map information.
+    - View ETA: To store ETA associated with Mark's pick-up and drop-off points.
+    - Find A Driver: To store John's details associated with Mark's ride.
+    - Track the Ride: To store Mark and John's ride tracking information.
+
+##### Caching Strategy
+
+- Internally, we can implement __Cache Aside Strategy__ for read operations and __Write Aside Strategy__ for write operations as user's data storage has more importance in the cab sharing system.
+*Note:* For more details on caching, refer to our [Caching Basics](../1.%20System%20Design%20Basics/Caching%20Basics.md).
+- As there is a chance of stale data, we can use [ZooKeeper service](https://en.wikipedia.org/wiki/Apache_ZooKeeper) to maintain synchronization between database and its replica(s).
+
+##### Replication Strategy
+
+- To keep user data safe without lose, we can use replication of user record data.
+- User data replication can use master-slave strategy.
+    - In the master-slave strategy-
+        - We can use master database for write operations and slave database for only read operations.
+    - Masters can be more than one in order to avoid single point of failure for write operations.
+    - Slaves can be many to secure user record data as per business needs.
 
 <hr style="border:2px solid gray">
 

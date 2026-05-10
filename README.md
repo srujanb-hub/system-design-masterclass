@@ -116,28 +116,6 @@ If you'd like to contribute to this repository, please follow these steps:
 
 ---
 
-## 📧 Contact
-
-For questions or feedback, please reach out to our team:
-
-**Email**: [rohit.jain@sweetcodey.com](mailto:rohit.jain@sweetcodey.com)
-**LinkedIn**: [Rohit Jain](https://www.linkedin.com/in/rohit-jain-343437187/)
-**Udemy**: [Rohit Jain Udemy](https://www.udemy.com/user/a6a5d0a8-fdb1-40b1-84d5-1fe3a0861886/?srsltid=AfmBOorFxVmdc-iiXCBxTIi55kK34cX89Z9LjZg3JZ_7hEgtoc7sD2f1)
-
-**Email**: [shubham.chandak@sweetcodey.com](mailto:shubham.chandak@sweetcodey.com)
-**LinkedIn**: [Shubham Chandak](https://www.linkedin.com/in/shubham-chandak/)
-**Udemy**: [Shubham Chandak Udemy](https://www.udemy.com/user/shubham-chandak/?srsltid=AfmBOoopfGyHitKbB_iu4qGJeEDQG7poS3qRhmmK0lgJUkUGtjLDCyiO)
-
-**Email**: [suresh.gandhi@sweetcodey.com](mailto:suresh.gandhi@sweetcodey.com)
-**LinkedIn**: [Suresh Gandhi](https://www.linkedin.com/in/suresh-g-688608191/)
-**Udemy**: [Suresh Gandhi Udemy](https://www.udemy.com/user/suresh-gandhi/)
-
-**Email**: [devtomx@gmail.com](mailto:devtomx@gmail.com)
-**LinkedIn**: [Wellington Alves das Neves](https://www.linkedin.com/in/wellingtonalvesneves)
-**Twitter**: [@tomxdev](#)
-
----
-
 ### 🧑‍💻 About This Repository
 
 This repository was created in relation to the **System Design Masterclass (2025)** course on Udemy. It compiles insights and structured resources on design systems and system design principles for anyone interested in the subject. The course is available here: [System Design Masterclass](https://www.udemy.com/course/system-design-masterclass/?referralCode=21363E64705E6B6E279B). You can also find many free resources related to this on [Sweet Codey Official Website](https://www.sweetcodey.com).
